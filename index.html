@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Игра в магазине</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+      }
+
+      header {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px;
+        font-size: 24px;
+      }
+
+      #game-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .store {
+        margin: 20px;
+        padding: 20px;
+        border: 2px solid #ccc;
+        border-radius: 10px;
+        background-color: white;
+      }
+
+      .product {
+        margin: 10px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      #cart-summary {
+        background-color: #4caf50;
+        color: white;
+        padding: 10px;
+        font-size: 18px;
+        margin-top: 20px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>Игра в магазине</header>
+
+    <div id="game-container"></div>
+
+    <script>
+      class Product {
+        constructor(name, price) {
+          this.name = name;
+          this.price = price;
+        }
+      }
+
+      class Store {
+        constructor(name, products) {
+          this.name = name;
+          this.products = products;
+        }
+      }
+
+      function startGame() {
+        const stores = [
+          new Store("Магазин 1", [
+            new Product("Яблоко", 2),
+            new Product("Банан", 1),
+            new Product("Апельсин", 1.5),
+          ]),
+          new Store("Магазин 2", [
+            new Product("Молоко", 3),
+            new Product("Хлеб", 1.5),
+            new Product("Сыр", 4),
+          ]),
+          // Добавьте остальные магазины аналогично
+        ];
+
+        const gameContainer = document.getElementById("game-container");
+        const cartSummary = document.createElement("div");
+        cartSummary.id = "cart-summary";
+
+        let budget = parseFloat(prompt("Введите ваш бюджет: $"));
+        let shoppingCart = {};
+
+        stores.forEach((store) => {
+          const storeElement = document.createElement("div");
+          storeElement.classList.add("store");
+          storeElement.innerHTML = `<h2>${store.name}</h2>`;
+
+          store.products.forEach((product) => {
+            const productElement = document.createElement("div");
+            productElement.classList.add("product");
+            productElement.innerHTML = `
+                   
+                    <p>${product.name} - $${product.price} за кг</p>
+                `;
+            productElement.addEventListener("click", () => addToCart(product));
+
+            storeElement.appendChild(productElement);
+          });
+
+          gameContainer.appendChild(storeElement);
+        });
+
+        gameContainer.appendChild(cartSummary);
+
+        function addToCart(product) {
+          const quantity = parseFloat(
+            prompt(`Сколько килограммов ${product.name} вы хотите купить:`)
+          );
+          const cost = quantity * product.price;
+
+          if (cost > budget) {
+            alert("У вас недостаточно денег для этой покупки.");
+            return;
+          }
+
+          if (!shoppingCart[product.name]) {
+            shoppingCart[product.name] = { quantity: 0, cost: 0 };
+          }
+
+          shoppingCart[product.name].quantity += quantity;
+          shoppingCart[product.name].cost += cost;
+          budget -= cost;
+
+          updateCartSummary();
+        }
+
+        function updateCartSummary() {
+          cartSummary.innerHTML = "<h2>Итоговая покупка:</h2>";
+          for (const product in shoppingCart) {
+            cartSummary.innerHTML += `<p>${product}: ${
+              shoppingCart[product].quantity
+            } кг - $${shoppingCart[product].cost.toFixed(2)}</p>`;
+          }
+
+          cartSummary.innerHTML += `<p>Вы потратили: $${(
+            budget +
+            Object.values(shoppingCart).reduce(
+              (total, item) => total + item.cost,
+              0
+            )
+          ).toFixed(2)}</p>`;
+          cartSummary.innerHTML += `<p>Осталось денег: $${budget.toFixed(
+            2
+          )}</p>`;
+        }
+      }
+
+      startGame();
+    </script>
+  </body>
+</html>
